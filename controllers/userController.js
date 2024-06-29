@@ -123,5 +123,3 @@ module.exports = {
   register,
   login,
 };
-
-//hehe
