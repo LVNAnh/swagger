@@ -16,15 +16,15 @@ const options = {
           properties: {
             firstname: {
               type: "string",
-              example: "John",
+              example: "A",
             },
             lastname: {
               type: "string",
-              example: "Doe",
+              example: "Nguyen Van",
             },
             email: {
               type: "string",
-              example: "john.doe@example.com",
+              example: "nguyenvana@gmail.com",
             },
             mobile: {
               type: "string",
