@@ -55,11 +55,16 @@ const createProduct = asyncHandler(async (req, res) => {
  *         description: Server error
  */
 const getProductById = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  if (product) {
+  try {
+    const product = await Product.findById(req.params.id)
+      .populate("brand", "name")
+      .populate("category", "name");
+    if (!product) {
+      return res.status(404).json({ success: false, mes: "Product not found" });
+    }
     res.status(200).json(product);
-  } else {
-    res.status(404).json({ message: "Product not found" });
+  } catch (error) {
+    res.status(500).json({ success: false, mes: error.message });
   }
 });
 
@@ -76,8 +81,14 @@ const getProductById = asyncHandler(async (req, res) => {
  *         description: Server error
  */
 const getAllProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find();
-  res.status(200).json(products);
+  try {
+    const products = await Product.find()
+      .populate("brand", "name")
+      .populate("category", "name");
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ success: false, mes: error.message });
+  }
 });
 
 /**

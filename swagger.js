@@ -28,7 +28,7 @@ const options = {
             },
             mobile: {
               type: "string",
-              example: "+1234567890",
+              example: "0987654321",
             },
             password: {
               type: "string",
