@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const userRoutes = require("./Routes/user");
+const productRoutes = require("./Routes/product");
+
 const setupSwagger = require("./swagger");
 require("dotenv").config();
 
@@ -9,6 +11,7 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use("/api", userRoutes); // Đảm bảo rằng đường dẫn đúng
+app.use("/api", productRoutes); // Đảm bảo rằng đường dẫn đúng
 
 setupSwagger(app);
 
