@@ -50,31 +50,42 @@ const options = {
           properties: {
             category: {
               type: "string",
-              example: "Electronics",
+              format: "objectId",
             },
             brand: {
               type: "string",
-              example: "Sony",
+              format: "objectId",
             },
             image: {
               type: "string",
-              example: "http://example.com/image.jpg",
             },
             name: {
               type: "string",
-              example: "Smartphone",
             },
             price: {
               type: "number",
-              example: 299.99,
             },
             quantity: {
               type: "number",
-              example: 100,
             },
             description: {
               type: "string",
-              example: "A high-quality smartphone with advanced features.",
+            },
+          },
+        },
+        Brand: {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
+            },
+          },
+        },
+        Category: {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
             },
           },
         },

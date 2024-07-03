@@ -3,13 +3,13 @@ const mongoose = require("mongoose");
 // Declare the Schema of the Mongo model
 const productSchema = new mongoose.Schema(
   {
-    category: {
-      type: String,
-      required: true,
-    },
     brand: {
-      type: String,
-      required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Brand",
+    },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
     },
     image: {
       type: String,
