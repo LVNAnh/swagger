@@ -87,23 +87,27 @@ const register = asyncHandler(async (req, res) => {
  */
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
+  if (!email || !password)
     return res.status(400).json({
       success: false,
       mes: "Missing input",
     });
-  }
-  const user = await User.findOne({ email: email });
-  if (user && (await user.isCorrectPassword(password))) {
-    const { password, role, refreshToken, ...userData } = user.toObject();
-    const Accesstoken = generateAccessToken(user._id, role);
-    const newRefreshToken = generateRefreshToken(user._id);
+  const response = await User.findOne({ email: email });
+  if (response && (await response.isConrectPassword(password))) {
+    // Tách password và role khỏi response
+    const { password, role, refreshToken, ...userData } = response.toObject(); // hide 2 truong
+    // Tạo access token
+    const Accesstoken = generrateAccessToken(response._id, role);
+    // Tạo refresh token
+    const newrefreshToken = generrateRefreshToken(response._id);
+    // Lưu refres token vào database
     await User.findByIdAndUpdate(
-      user._id,
-      { refreshToken: newRefreshToken },
+      response._id,
+      { refreshToken: newrefreshToken },
       { new: true }
     );
-    res.cookie("refreshToken", newRefreshToken, {
+    // Lưu refresh token vào cookie
+    res.cookie("refreshToken", newrefreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
