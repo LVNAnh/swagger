@@ -56,16 +56,32 @@ const register = asyncHandler(async (req, res) => {
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     UserLogin:
+ *       type: object
+ *       properties:
+ *         email:
+ *           type: string
+ *         password:
+ *           type: string
+ *
+ * @swagger
  * /api/login:
  *   post:
- *     summary: Login a user
- *     tags: [Users]
+ *     summary: Login to user account
+ *     tags: [User]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Login successful
