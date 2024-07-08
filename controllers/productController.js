@@ -14,6 +14,8 @@ const Product = require("../model/Product");
  *   post:
  *     summary: Create a new product
  *     tags: [Products]
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -40,6 +42,8 @@ const createProduct = asyncHandler(async (req, res) => {
  *   get:
  *     summary: Get a product by ID
  *     tags: [Products]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -60,11 +64,13 @@ const getProductById = asyncHandler(async (req, res) => {
       .populate("brand", "name")
       .populate("category", "name");
     if (!product) {
-      return res.status(404).json({ success: false, mes: "Product not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
     }
     res.status(200).json(product);
   } catch (error) {
-    res.status(500).json({ success: false, mes: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -74,6 +80,8 @@ const getProductById = asyncHandler(async (req, res) => {
  *   get:
  *     summary: Get all products
  *     tags: [Products]
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Products retrieved successfully
@@ -87,7 +95,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
       .populate("category", "name");
     res.status(200).json(products);
   } catch (error) {
-    res.status(500).json({ success: false, mes: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -97,6 +105,8 @@ const getAllProducts = asyncHandler(async (req, res) => {
  *   put:
  *     summary: Update a product by ID
  *     tags: [Products]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -136,6 +146,8 @@ const updateProduct = asyncHandler(async (req, res) => {
  *   delete:
  *     summary: Delete a product by ID
  *     tags: [Products]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

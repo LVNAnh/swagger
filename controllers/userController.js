@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../model/User");
+const Product = require("../model/Product");
 const {
   generrateAccessToken,
   generrateRefreshToken,
@@ -42,14 +43,13 @@ const register = asyncHandler(async (req, res) => {
   }
   const user = await User.findOne({ email: email });
   if (user) {
-    throw new Error("User already exists");
+    return res.status(400).json({ success: false, mes: "User already exists" });
   } else {
     const newUser = await User.create(req.body);
     return res.status(200).json({
-      success: newUser ? true : false,
-      mes: newUser
-        ? "Registration successful. Go to login"
-        : "Something went wrong",
+      success: true,
+      mes: "Registration successful. Go to login",
+      user: newUser,
     });
   }
 });
@@ -76,7 +76,7 @@ const register = asyncHandler(async (req, res) => {
  *               properties:
  *                 success:
  *                   type: boolean
- *                 Accesstoken:
+ *                 accessToken:
  *                   type: string
  *                 userData:
  *                   $ref: '#/components/schemas/User'
@@ -92,32 +92,27 @@ const login = asyncHandler(async (req, res) => {
       success: false,
       mes: "Missing input",
     });
-  const response = await User.findOne({ email: email });
-  if (response && (await response.isConrectPassword(password))) {
-    // Tách password và role khỏi response
-    const { password, role, refreshToken, ...userData } = response.toObject(); // hide 2 truong
-    // Tạo access token
-    const Accesstoken = generrateAccessToken(response._id, role);
-    // Tạo refresh token
-    const newrefreshToken = generrateRefreshToken(response._id);
-    // Lưu refres token vào database
+  const user = await User.findOne({ email: email });
+  if (user && (await user.isConrectPassword(password))) {
+    const { password, role, refreshToken, ...userData } = user.toObject();
+    const accessToken = generrateAccessToken(user._id, role);
+    const newRefreshToken = generrateRefreshToken(user._id);
     await User.findByIdAndUpdate(
-      response._id,
-      { refreshToken: newrefreshToken },
+      user._id,
+      { refreshToken: newRefreshToken },
       { new: true }
     );
-    // Lưu refresh token vào cookie
-    res.cookie("refreshToken", newrefreshToken, {
+    res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return res.status(200).json({
       success: true,
-      Accesstoken,
+      accessToken,
       userData,
     });
   } else {
-    throw new Error("Invalid credentials");
+    return res.status(400).json({ success: false, mes: "Invalid credentials" });
   }
 });
 
@@ -127,6 +122,8 @@ const login = asyncHandler(async (req, res) => {
  *   get:
  *     summary: Get all users
  *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Users retrieved successfully
@@ -144,6 +141,8 @@ const getAllUsers = asyncHandler(async (req, res) => {
  *   get:
  *     summary: Get a user by ID
  *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -173,6 +172,8 @@ const getUserById = asyncHandler(async (req, res) => {
  *   put:
  *     summary: Update a user by ID
  *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -210,6 +211,8 @@ const updateUser = asyncHandler(async (req, res) => {
  *   delete:
  *     summary: Delete a user by ID
  *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -233,6 +236,108 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/cart:
+ *   put:
+ *     summary: Update the user's cart
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: Product ID
+ *               quantity:
+ *                 type: number
+ *                 description: Quantity of the product
+ *                 default: 1
+ *     responses:
+ *       200:
+ *         description: Cart updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+const updateCart = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  const { id, quantity = 1 } = req.body;
+  if (!id) throw new Error("Missing input");
+
+  const user = await User.findById(_id).select("cart");
+  const product = await Product.findById(id);
+
+  if (!product) {
+    return res.status(400).json({
+      success: false,
+      mes: "Product not found",
+    });
+  }
+
+  const alreadyProduct = user?.cart?.find(
+    (el) => el.product && el.product.toString() === id
+  );
+
+  if (alreadyProduct) {
+    const response = await User.updateOne(
+      { _id, "cart.product": id },
+      {
+        $set: {
+          "cart.$.quantity": quantity,
+          "cart.$.price": product.price,
+          "cart.$.name": product.title,
+          "cart.$.image": product.image,
+        },
+      },
+      { new: true }
+    );
+    return res.status(200).json({
+      success: response ? true : false,
+      mes: response ? "Updated your cart" : "Something went wrong",
+    });
+  } else {
+    const response = await User.findByIdAndUpdate(
+      _id,
+      {
+        $push: {
+          cart: {
+            product: id,
+            quantity,
+            price: product.price,
+            title: product.title,
+            image: product.image,
+          },
+        },
+      },
+      { new: true }
+    );
+    return res.status(200).json({
+      success: response ? true : false,
+      mes: response ? "Updated your cart" : "Something went wrong",
+    });
+  }
+});
+
 module.exports = {
   register,
   login,
@@ -240,4 +345,5 @@ module.exports = {
   getUserById,
   updateUser,
   deleteUser,
+  updateCart,
 };

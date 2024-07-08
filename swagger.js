@@ -10,18 +10,27 @@ const options = {
       description: "API documentation for managing Users and Products",
     },
     components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
       schemas: {
         User: {
           type: "object",
           properties: {
             firstname: {
               type: "string",
+              example: "John",
             },
             lastname: {
               type: "string",
             },
             email: {
               type: "string",
+              example: "hehe@gmail.com",
             },
             mobile: {
               type: "string",
@@ -31,10 +40,10 @@ const options = {
             },
             address: {
               type: "string",
-              example: "",
+              example: "123 ABC Street",
             },
             role: {
-              type: "string",
+              type: "number",
               enum: [1945, 1979],
               example: 1979,
             },
@@ -94,6 +103,11 @@ const options = {
       {
         name: "Products",
         description: "Product management API",
+      },
+    ],
+    security: [
+      {
+        BearerAuth: [],
       },
     ],
   },

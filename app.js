@@ -4,6 +4,7 @@ const userRoutes = require("./Routes/user");
 const productRoutes = require("./Routes/product");
 const brandRoutes = require("./Routes/brand");
 const categoryRoutes = require("./Routes/category");
+const orderRoutes = require("./Routes/order");
 
 const setupSwagger = require("./swagger");
 require("dotenv").config();
@@ -16,6 +17,7 @@ app.use("/api", userRoutes); // Routes cho Users
 app.use("/api", productRoutes); // Routes cho Products
 app.use("/api", brandRoutes); // Routes cho Brands
 app.use("/api", categoryRoutes); // Routes cho Categories
+app.use("/api", orderRoutes);
 
 setupSwagger(app);
 
