@@ -22,7 +22,9 @@ app.use("/api", orderRoutes);
 setupSwagger(app);
 
 mongoose
-  .connect("mongodb://localhost:27017/nomydatabase")
+  .connect(
+    "mongodb+srv://NHATANH:WMGaAVaGCtsPnC1k@cluster0.6z5yhqo.mongodb.net/Swagger"
+  )
   .then(() => {
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
