@@ -19,9 +19,32 @@ const Product = require("../model/Product");
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             type: object
+ *             properties:
+ *               category:
+ *                 type: string
+ *               brand:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               quantity:
+ *                 type: number
+ *               description:
+ *                 type: string
+ *             required:
+ *               - name
+ *               - price
+ *               - quantity
+ *               - category
+ *               - brand
+ *               - image
+ *               - description
  *     responses:
  *       201:
  *         description: Product created successfully

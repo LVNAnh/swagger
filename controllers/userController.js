@@ -22,9 +22,34 @@ const {
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             type: object
+ *             properties:
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               mobile:
+ *                 type: string
+ *               role:
+ *                 type: number
+ *                 enum: [1945, 1979]
+ *                 example: 1979
+ *             required:
+ *               - firstname
+ *               - lastname
+ *               - email
+ *               - password
+ *               - address
+ *               - mobile
+ *               - role
  *     responses:
  *       200:
  *         description: Registration successful
@@ -34,8 +59,17 @@ const {
  *         description: Server error
  */
 const register = asyncHandler(async (req, res) => {
-  const { email, password, firstname, lastname, address, mobile } = req.body;
-  if (!email || !password || !lastname || !firstname || !address || !mobile) {
+  const { email, password, firstname, lastname, address, mobile, role } =
+    req.body;
+  if (
+    !email ||
+    !password ||
+    !lastname ||
+    !firstname ||
+    !address ||
+    !mobile ||
+    !role
+  ) {
     return res.status(400).json({
       success: false,
       mes: "Missing input",
@@ -66,7 +100,6 @@ const register = asyncHandler(async (req, res) => {
  *         password:
  *           type: string
  *
- * @swagger
  * /api/login:
  *   post:
  *     summary: Login to user account
@@ -74,7 +107,7 @@ const register = asyncHandler(async (req, res) => {
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -82,6 +115,9 @@ const register = asyncHandler(async (req, res) => {
  *                 type: string
  *               password:
  *                 type: string
+ *             required:
+ *               - email
+ *               - password
  *     responses:
  *       200:
  *         description: Login successful
@@ -199,9 +235,20 @@ const getUserById = asyncHandler(async (req, res) => {
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             type: object
+ *             properties:
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               mobile:
+ *                 type: string
+ *               address:
+ *                 type: string
  *     responses:
  *       200:
  *         description: User updated successfully
@@ -263,7 +310,7 @@ const deleteUser = asyncHandler(async (req, res) => {
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:

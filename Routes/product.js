@@ -4,13 +4,8 @@ const productController = require("../controllers/productController");
 const { isAdmin, verifyToken } = require("../middlewares/auth");
 
 router.post("/products", verifyToken, isAdmin, productController.createProduct);
-router.get(
-  "/products/:id",
-  verifyToken,
-  isAdmin,
-  productController.getProductById
-);
-router.get("/products", verifyToken, isAdmin, productController.getAllProducts);
+router.get("/products/:id", productController.getProductById);
+router.get("/products", productController.getAllProducts);
 router.put(
   "/products/:id",
   verifyToken,

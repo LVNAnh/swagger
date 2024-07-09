@@ -9,11 +9,6 @@ router.post(
   isAdmin,
   categoryController.createCategory
 );
-router.get(
-  "/categories",
-  verifyToken,
-  isAdmin,
-  categoryController.getAllCategories
-);
+router.get("/categories", categoryController.getAllCategories);
 
 module.exports = router;
