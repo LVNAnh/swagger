@@ -14,10 +14,10 @@ const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use("/api", userRoutes); // Routes cho Users
-app.use("/api", productRoutes); // Routes cho Products
-app.use("/api", brandRoutes); // Routes cho Brands
-app.use("/api", categoryRoutes); // Routes cho Categories
+app.use("/api", userRoutes);
+app.use("/api", productRoutes);
+app.use("/api", brandRoutes);
+app.use("/api", categoryRoutes);
 app.use("/api", orderRoutes);
 
 setupSwagger(app);
