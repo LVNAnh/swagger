@@ -1,5 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const Product = require("../model/Product");
+const Brand = require("../model/Brand");
+const Category = require("../model/Category");
 
 /**
  * @swagger
@@ -105,6 +107,32 @@ const getProductById = asyncHandler(async (req, res) => {
  *     tags: [Products]
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Product name
+ *       - in: query
+ *         name: brand
+ *         schema:
+ *           type: string
+ *         description: Product brand
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Product category
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *         description: Minimum price
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *         description: Maximum price
  *     responses:
  *       200:
  *         description: Products retrieved successfully
@@ -113,7 +141,48 @@ const getProductById = asyncHandler(async (req, res) => {
  */
 const getAllProducts = asyncHandler(async (req, res) => {
   try {
-    const products = await Product.find()
+    const { name, brand, category, minPrice, maxPrice } = req.query;
+    let filter = {};
+
+    if (name) {
+      filter.name = { $regex: name, $options: "i" };
+    }
+
+    if (brand) {
+      const brandDoc = await Brand.findOne({
+        name: { $regex: brand, $options: "i" },
+      });
+      if (brandDoc) {
+        filter.brand = brandDoc._id;
+      } else {
+        return res
+          .status(404)
+          .json({ success: false, message: "Brand not found" });
+      }
+    }
+
+    if (category) {
+      const categoryDoc = await Category.findOne({
+        name: { $regex: category, $options: "i" },
+      });
+      if (categoryDoc) {
+        filter.category = categoryDoc._id;
+      } else {
+        return res
+          .status(404)
+          .json({ success: false, message: "Category not found" });
+      }
+    }
+
+    if (minPrice && maxPrice) {
+      filter.price = { $gte: minPrice, $lte: maxPrice };
+    } else if (minPrice) {
+      filter.price = { $gte: minPrice };
+    } else if (maxPrice) {
+      filter.price = { $lte: maxPrice };
+    }
+
+    const products = await Product.find(filter)
       .populate("brand", "name")
       .populate("category", "name");
     res.status(200).json(products);
