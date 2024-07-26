@@ -169,6 +169,11 @@ const getProductById = asyncHandler(async (req, res) => {
  *         schema:
  *           type: number
  *         description: Maximum price
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: number
+ *         description: Limit the number of products returned
  *     responses:
  *       200:
  *         description: Products retrieved successfully
@@ -177,7 +182,7 @@ const getProductById = asyncHandler(async (req, res) => {
  */
 const getAllProducts = asyncHandler(async (req, res) => {
   try {
-    const { name, brand, category, minPrice, maxPrice } = req.query;
+    const { name, brand, category, minPrice, maxPrice, limit } = req.query;
     let filter = {};
 
     if (name) {
@@ -218,9 +223,15 @@ const getAllProducts = asyncHandler(async (req, res) => {
       filter.price = { $lte: maxPrice };
     }
 
-    const products = await Product.find(filter)
+    const productsQuery = Product.find(filter)
       .populate("brand", "name")
       .populate("category", "name");
+
+    if (limit) {
+      productsQuery.limit(Number(limit));
+    }
+
+    const products = await productsQuery.exec();
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
