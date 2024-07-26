@@ -255,9 +255,31 @@ const getAllProducts = asyncHandler(async (req, res) => {
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             type: object
+ *             properties:
+ *               category:
+ *                 type: string
+ *                 example: ""
+ *               brand:
+ *                 type: string
+ *                 example: ""
+ *               name:
+ *                 type: string
+ *                 example: ""
+ *               image:
+ *                 type: string
+ *                 example: ""
+ *               price:
+ *                 type: number
+ *                 example: ""
+ *               quantity:
+ *                 type: number
+ *                 example: ""
+ *               description:
+ *                 type: string
+ *                 example: ""
  *     responses:
  *       200:
  *         description: Product updated successfully
@@ -267,15 +289,57 @@ const getAllProducts = asyncHandler(async (req, res) => {
  *         description: Server error
  */
 const updateProduct = asyncHandler(async (req, res) => {
-  const updatedProduct = await Product.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true }
-  );
-  if (updatedProduct) {
+  try {
+    const { category, brand, name, image, price, quantity, description } =
+      req.body;
+    const updates = {};
+
+    if (name) updates.name = name;
+    if (image) updates.image = image;
+    if (price) updates.price = price;
+    if (quantity) updates.quantity = quantity;
+    if (description) updates.description = description;
+
+    if (brand) {
+      const brandDoc = await Brand.findOne({
+        name: { $regex: brand, $options: "i" },
+      });
+      if (brandDoc) {
+        updates.brand = brandDoc._id;
+      } else {
+        return res
+          .status(404)
+          .json({ success: false, message: "Brand not found" });
+      }
+    }
+
+    if (category) {
+      const categoryDoc = await Category.findOne({
+        name: { $regex: category, $options: "i" },
+      });
+      if (categoryDoc) {
+        updates.category = categoryDoc._id;
+      } else {
+        return res
+          .status(404)
+          .json({ success: false, message: "Category not found" });
+      }
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      updates,
+      { new: true }
+    );
+    if (!updatedProduct) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
+    }
+
     res.status(200).json(updatedProduct);
-  } else {
-    res.status(404).json({ message: "Product not found" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 

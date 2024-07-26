@@ -17,7 +17,7 @@ const Category = require("../model/Category");
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:

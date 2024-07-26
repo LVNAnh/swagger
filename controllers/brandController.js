@@ -17,7 +17,7 @@ const Brand = require("../model/Brand");
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
