@@ -56,9 +56,45 @@ const Category = require("../model/Category");
  *         description: Server error
  */
 const createProduct = asyncHandler(async (req, res) => {
-  const newProduct = new Product(req.body);
-  const savedProduct = await newProduct.save();
-  res.status(201).json(savedProduct);
+  try {
+    const { name, price, quantity, category, brand, image, description } =
+      req.body;
+
+    // Find brand by name
+    const brandDoc = await Brand.findOne({
+      name: { $regex: brand, $options: "i" },
+    });
+    if (!brandDoc) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Brand not found" });
+    }
+
+    // Find category by name
+    const categoryDoc = await Category.findOne({
+      name: { $regex: category, $options: "i" },
+    });
+    if (!categoryDoc) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Category not found" });
+    }
+
+    const newProduct = new Product({
+      name,
+      price,
+      quantity,
+      category: categoryDoc._id,
+      brand: brandDoc._id,
+      image,
+      description,
+    });
+
+    const savedProduct = await newProduct.save();
+    res.status(201).json(savedProduct);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 /**
