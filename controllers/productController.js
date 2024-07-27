@@ -2,6 +2,25 @@ const asyncHandler = require("express-async-handler");
 const Product = require("../model/Product");
 const Brand = require("../model/Brand");
 const Category = require("../model/Category");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+
+const uploadDir = "uploads/";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir); // Upload destination
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)); // Appending extension
+  },
+});
+
+const upload = multer({ storage: storage });
 
 /**
  * @swagger
@@ -21,7 +40,7 @@ const Category = require("../model/Category");
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -31,6 +50,7 @@ const Category = require("../model/Category");
  *                 type: string
  *               image:
  *                 type: string
+ *                 format: binary
  *               name:
  *                 type: string
  *               price:
@@ -57,8 +77,8 @@ const Category = require("../model/Category");
  */
 const createProduct = asyncHandler(async (req, res) => {
   try {
-    const { name, price, quantity, category, brand, image, description } =
-      req.body;
+    const { name, price, quantity, category, brand, description } = req.body;
+    const image = req.file ? req.file.filename : null;
 
     // Find brand by name
     const brandDoc = await Brand.findOne({
@@ -255,7 +275,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -270,6 +290,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
  *                 example: ""
  *               image:
  *                 type: string
+ *                 format: binary
  *                 example: ""
  *               price:
  *                 type: number
@@ -290,8 +311,8 @@ const getAllProducts = asyncHandler(async (req, res) => {
  */
 const updateProduct = asyncHandler(async (req, res) => {
   try {
-    const { category, brand, name, image, price, quantity, description } =
-      req.body;
+    const { category, brand, name, price, quantity, description } = req.body;
+    const image = req.file ? req.file.filename : null;
     const updates = {};
 
     if (name) updates.name = name;
@@ -309,7 +330,7 @@ const updateProduct = asyncHandler(async (req, res) => {
       } else {
         return res
           .status(404)
-          .json({ success: false, message: "Brand not found" });
+          .json({ success: false, message: "Không tìm thấy thương hiệu" });
       }
     }
 
@@ -322,7 +343,7 @@ const updateProduct = asyncHandler(async (req, res) => {
       } else {
         return res
           .status(404)
-          .json({ success: false, message: "Category not found" });
+          .json({ success: false, message: "Không tìm thấy danh mục" });
       }
     }
 
@@ -334,7 +355,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     if (!updatedProduct) {
       return res
         .status(404)
-        .json({ success: false, message: "Product not found" });
+        .json({ success: false, message: "Không tìm thấy sản phẩm" });
     }
 
     res.status(200).json(updatedProduct);
@@ -375,9 +396,9 @@ const deleteProduct = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  createProduct,
+  createProduct: [upload.single("image"), createProduct],
   getProductById,
   getAllProducts,
-  updateProduct,
+  updateProduct: [upload.single("image"), updateProduct],
   deleteProduct,
 };

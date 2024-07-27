@@ -427,7 +427,7 @@ const updateCart = asyncHandler(async (req, res) => {
     );
     return res.status(200).json({
       success: response ? true : false,
-      mes: response ? "Updated your cart" : "Something went wrong",
+      mes: response ? "Giỏ hàng đã được cập nhật" : "Lỗi",
     });
   }
 });
