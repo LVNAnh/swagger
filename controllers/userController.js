@@ -97,12 +97,10 @@ const register = asyncHandler(async (req, res) => {
 
   const userByEmail = await User.findOne({ email });
   if (userByEmail) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        mes: "Email đã tồn tại trong hệ thống, vui lòng thử email khác",
-      });
+    return res.status(400).json({
+      success: false,
+      mes: "Email đã tồn tại trong hệ thống, vui lòng thử email khác",
+    });
   }
 
   const userByMobile = await User.findOne({ mobile });
@@ -175,7 +173,7 @@ const login = asyncHandler(async (req, res) => {
   if (!email || !password)
     return res.status(400).json({
       success: false,
-      mes: "Missing input",
+      mes: "Vui lòng nhập thông tin đăng nhập",
     });
   const user = await User.findOne({ email: email });
   if (user && (await user.isConrectPassword(password))) {
