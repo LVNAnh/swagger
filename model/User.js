@@ -28,11 +28,19 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      minLength: 8,
       required: true,
+      minLength: 8,
+      validate: {
+        validator: function (value) {
+          // Password validation regex
+          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$/.test(value);
+        },
+        message:
+          "Password must be at least 8 characters long and include uppercase letters, lowercase letters, and special characters.",
+      },
     },
     role: {
-      type: String,
+      type: Number,
       enum: [1945, 1979],
       default: 1979,
     },
@@ -54,14 +62,14 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
-    passwordChangArt: {
-      type: String,
+    passwordChangedAt: {
+      type: Date,
     },
     passwordResetToken: {
       type: String,
     },
     passwordResetExpires: {
-      type: String,
+      type: Date,
     },
   },
   {
@@ -76,19 +84,20 @@ userSchema.pre("save", async function (next) {
   }
   const salt = bcrypt.genSaltSync(10);
   this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
 userSchema.methods = {
-  isConrectPassword: async function (password) {
+  isCorrectPassword: async function (password) {
     return await bcrypt.compare(password, this.password);
   },
-  createPasswordchangedToken: function () {
-    const resetToken = crypto.randomBytes(32).toString("hex"); // 16 ky tu 0>9 a>s
+  createPasswordChangedToken: function () {
+    const resetToken = crypto.randomBytes(32).toString("hex");
     this.passwordResetToken = crypto
       .createHash("sha256")
       .update(resetToken)
       .digest("hex");
-    this.passwordResetExpires = Date.now() + 15 * 60 * 1000; // cong 15p
+    this.passwordResetExpires = Date.now() + 15 * 60 * 1000; // 15 minutes from now
     return resetToken;
   },
 };
