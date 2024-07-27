@@ -61,6 +61,7 @@ const {
 const register = asyncHandler(async (req, res) => {
   const { email, password, firstname, lastname, address, mobile, role } =
     req.body;
+
   if (
     !email ||
     !password ||
@@ -75,14 +76,26 @@ const register = asyncHandler(async (req, res) => {
       mes: "Missing input",
     });
   }
+
+  // Check password requirements
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$/;
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({
+      success: false,
+      mes: "Mật khẩu phải có ít nhất 8 ký tự bao gồm ít nhất 1 ký tự thường, 1 ký tự in hoa và 1 ký tự đặc biệt",
+    });
+  }
+
   const user = await User.findOne({ email: email });
   if (user) {
-    return res.status(400).json({ success: false, mes: "User already exists" });
+    return res
+      .status(400)
+      .json({ success: false, mes: "Người dùng đã tồn tại" });
   } else {
     const newUser = await User.create(req.body);
     return res.status(200).json({
       success: true,
-      mes: "Registration successful. Go to login",
+      mes: "Đăng ký thành công! Vui lòng đăng nhập",
       user: newUser,
     });
   }
