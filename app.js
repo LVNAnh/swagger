@@ -6,7 +6,7 @@ const productRoutes = require("./Routes/product");
 const brandRoutes = require("./Routes/brand");
 const categoryRoutes = require("./Routes/category");
 const orderRoutes = require("./Routes/order");
-const typeDefs = require("./typeDef");
+const typeDefs = require("./typeDefs");
 const resolvers = require("./resolvers");
 
 const setupSwagger = require("./swagger");
