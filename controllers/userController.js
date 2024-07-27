@@ -73,7 +73,16 @@ const register = asyncHandler(async (req, res) => {
   ) {
     return res.status(400).json({
       success: false,
-      mes: "Missing input",
+      mes: "Nhập thiếu, vui lòng nhập đầy đủ",
+    });
+  }
+
+  // Check email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      success: false,
+      mes: "Định dạng email không hợp lệ",
     });
   }
 
@@ -86,19 +95,30 @@ const register = asyncHandler(async (req, res) => {
     });
   }
 
-  const user = await User.findOne({ email: email });
-  if (user) {
+  const userByEmail = await User.findOne({ email });
+  if (userByEmail) {
     return res
       .status(400)
-      .json({ success: false, mes: "Người dùng đã tồn tại" });
-  } else {
-    const newUser = await User.create(req.body);
-    return res.status(200).json({
-      success: true,
-      mes: "Đăng ký thành công! Vui lòng đăng nhập",
-      user: newUser,
+      .json({
+        success: false,
+        mes: "Email đã tồn tại trong hệ thống, vui lòng thử email khác",
+      });
+  }
+
+  const userByMobile = await User.findOne({ mobile });
+  if (userByMobile) {
+    return res.status(400).json({
+      success: false,
+      mes: "Số điện thoại đã thuộc về 1 tài khoản khác",
     });
   }
+
+  const newUser = await User.create(req.body);
+  return res.status(200).json({
+    success: true,
+    mes: "Đăng ký thành công, vui lòng đăng nhập",
+    user: newUser,
+  });
 });
 
 /**
